@@ -72,27 +72,13 @@ def main(argv):
             region = arg
         elif opt in ("-t", "--tag"):
             tag = arg
-
-    if not aws_key or not aws_secret:
-        if not aws_key:
-            print >>sys.stderr,\
-            "AWS_ACCESS_KEY_ID not set in environment and not",\
-            "specified by --aws-key KEY or -k KEY"
-
-        if not aws_secret:
-            print >>sys.stderr,\
-            "AWS_SECRET_ACCESS_KEY not set in environment and not",\
-            "specified by --aws-secret SECRET or -s SECRET"
-
         short_usage()
         sys.exit(2)
 
-    region = region and boto.ec2.get_region(region,
-                                            aws_access_key_id=aws_key,
-                                            aws_secret_access_key=aws_secret)
+    region = region and boto.ec2.get_region(region)
 
     global _ec2
-    _ec2 = boto.ec2.connection.EC2Connection(aws_key, aws_secret, region=region)
+    _ec2 = boto.ec2.connection.EC2Connection(region=region)
 
     argc = len(args)
 

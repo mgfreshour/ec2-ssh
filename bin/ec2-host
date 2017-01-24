@@ -72,8 +72,9 @@ def main(argv):
             region = arg
         elif opt in ("-t", "--tag"):
             tag = arg
-        short_usage()
-        sys.exit(2)
+	else:
+            short_usage()
+            sys.exit(2)
 
     region = region and boto.ec2.get_region(region)
 

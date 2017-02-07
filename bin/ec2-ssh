@@ -60,6 +60,11 @@ fi
 
 # get host from ec2-host command
 host=$(eval "$cmd $inst")
+if [[ $(echo "$host" | wc -l) -gt 1 ]]; then
+  echo "Multiple hosts by that name:"
+  echo "$host"
+  exit 1
+fi
 
 # pass all other parameters (${@:2}) to ssh allowing
 # things like: ec2-ssh nginx uptime

@@ -85,7 +85,7 @@ def main(argv):
 
     filters = {}
     if argc != 1:
-        print >>stderr, "Warning: you must provide a singe name to find host of!"
+        print >>stderr, "Warning: you must provide a single name to find host of!"
         sys.exit(1)
         return
     

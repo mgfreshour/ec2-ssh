@@ -84,12 +84,16 @@ def main(argv):
     argc = len(args)
 
     filters = {}
-    if argc == 1:
-        filters['tag:%s' % tag] = args[0]
-    elif argc > 1:
-        print >>stderr, "Warning: more than one name given"
+    if argc != 1:
+        print >>stderr, "Warning: you must provide a singe name to find host of!"
         sys.exit(1)
         return
+    
+    if args[0][0:2] == 'i-':
+        filters['instance-id'] = args[0]
+    else:
+        filters['tag:%s' % tag] = args[0]
+
 
     instances = ec2_active_instances(tag, filters)
 

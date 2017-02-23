@@ -40,8 +40,8 @@ def ec2_active_instances(label_tag, filters):
     for reservation in reservations:
         for instance in reservation.instances:
             instance_name = instance.tags.get(label_tag)
-            if instance.public_dns_name:
-                pair = (instance_name, instance.public_dns_name)
+            if instance.ip_address:
+                pair = (instance_name, instance.ip_address)
                 instances.append(pair)
     return instances
 
@@ -72,7 +72,7 @@ def main(argv):
             region = arg
         elif opt in ("-t", "--tag"):
             tag = arg
-	else:
+        else:
             short_usage()
             sys.exit(2)
 
@@ -104,7 +104,13 @@ def main(argv):
 
         sys.exit(0)
         return
-    elif numinstances == 0 or numinstances > 1:
+    elif numinstances == 0:
+        filters['tag:%s' % tag] = args[0] + '*'
+        instances = ec2_active_instances(tag, filters)
+        print '-- Unable to find your exact search. Do any of these help?'
+        for pair in sorted(instances, key=lambda p: p[0]):
+            print "%s\t%s" % pair
+    elif numinstances > 1:
         for pair in sorted(instances, key=lambda p: p[0]):
             print "%s\t%s" % pair
 

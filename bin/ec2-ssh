@@ -66,46 +66,10 @@ if [[ $(echo "$host" | wc -l) -gt 1 ]]; then
   exit 1
 fi
 
-# read files with code that we wanna execute on all ssh sessions
-remote_rcfile='.'$(whoami)'.ec2sshrc'
-remote_vimfile='.'$(whoami)'.ec2vimrc'
-
-code="PS1='\[\e]0;$inst: \w\a\]\[\033[01;32m\]$inst\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '"$'\n'
-
-ec2sshrcfile="$HOME/.ec2sshrc"
-if [ -f "$ec2sshrcfile" ]; then
-  code="$code"$(cat "$ec2sshrcfile")$'\n'
-fi
-aliasfile="$HOME/.alias"
-if [ -f "$aliasfile" ]; then
-  code="$code"$(cat "$aliasfile")$'\n'
-fi
-vimrcfile="$HOME/.ec2vim"
-if [ -f "$vimrcfile" ]; then
-  code="$code""alias vim='vim -u ~/$remote_vimfile'"$'\n'
-  code="$code""alias vi='vi -u ~/$remote_vimfile'"$'\n'
-  vimcode=$(cat "$vimrcfile")
-fi
-
-cmd='CODE=$(echo "'$(echo "$code" | base64)'" | base64 --decode)
-echo ". ~/.bashrc
-$CODE" > ~/'$remote_rcfile''$'\n'
-
-if [ -n "$vimcode" ]; then
-  cmd="$cmd"'VIMCODE=$(echo "'$(echo "$vimcode" | base64)'" | base64 --decode)
-  echo "$VIMCODE" > ~/'$remote_vimfile
-fi
-
-cmd="$cmd
-/bin/bash --rcfile $remote_rcfile -i"
-
 # pass all other parameters (${@:2}) to ssh allowing
 # things like: ec2-ssh nginx uptime
+cmd="echo \\\". ~/.bashrc && PS1='\[\e]0;$inst: \w\\\a\]\[\\\033[01;32m\]$inst\[\\\033[00m\]:\[\\\033[01;34m\]\w\[\\\033[00m\]\\\$ '\\\" > ~/.ec2sshrc; /bin/bash --rcfile .ec2sshrc -i"
 if test "${@:2}"; then
-    cmd="$cmd -c '"${@:2}"'"
+    cmd="${@:2}"
 fi
-if [ -n "$host" ]
-then
-    echo "Connecting to $host."
-    ssh -t $user@$host "$cmd"
-fi
+test -n "$host" && echo "Connecting to $host." && exec sh -c "ssh -t $user@$host \"$cmd\""
